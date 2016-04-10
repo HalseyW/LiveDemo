@@ -13,4 +13,8 @@
 
     <string name="flash_light_on">开</string>
     <string name="flash_light_off">关</string>
+
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

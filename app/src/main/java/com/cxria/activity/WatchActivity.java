@@ -1,10 +1,15 @@
 package com.cxria.activity;
 
+import android.app.ProgressDialog;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Pair;
+import android.view.WindowManager;
 
 import com.cxria.utils.MediaController;
 import com.pili.pldroid.player.AVOptions;
+import com.pili.pldroid.player.common.Util;
 import com.pili.pldroid.player.widget.VideoView;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
@@ -18,10 +23,14 @@ public class WatchActivity extends AppCompatActivity implements
         IjkMediaPlayer.OnPreparedListener {
     private MediaController mMediaController;
     private VideoView mVideoView;
+    private Pair<Integer, Integer> mScreenSize;
+    private ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_watch);
 
         mMediaController = new MediaController(this, false, false);
@@ -47,6 +56,7 @@ public class WatchActivity extends AppCompatActivity implements
         mVideoView.setOnVideoSizeChangedListener(this);
 
         mVideoView.requestFocus();
+        dialog = ProgressDialog.show(this, "", "正在缓冲...");
     }
 
     @Override
@@ -66,11 +76,27 @@ public class WatchActivity extends AppCompatActivity implements
 
     @Override
     public void onPrepared(IMediaPlayer iMediaPlayer) {
-
+        dialog.dismiss();
     }
 
     @Override
-    public void onVideoSizeChanged(IMediaPlayer iMediaPlayer, int i, int i1, int i2, int i3) {
+    public void onVideoSizeChanged(IMediaPlayer iMediaPlayer, int width, int height, int sarNum, int sarDen) {
+        if (width > height) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+            mScreenSize = Util.getResolution(this);
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+            mScreenSize = Util.getResolution(this);
+        }
 
+        if (width < mScreenSize.first) {
+            height = mScreenSize.first * height / width;
+            width = mScreenSize.first;
+        }
+
+        if (width * height < mScreenSize.first * mScreenSize.second) {
+            width = mScreenSize.second * width / height;
+            height = mScreenSize.second;
+        }
     }
 }
