@@ -30,4 +30,21 @@
         android:text="准备"
         android:textColor="@color/colorAccent"
         android:visibility="visible" />
+
+    <Button
+        android:id="@+id/btn_switch_cam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_margin="20dp"
+        android:text="切换摄像头" />
+
+    <Button
+        android:id="@+id/btn_live_or_not"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp"
+        android:text="开始直播" />
 </RelativeLayout>

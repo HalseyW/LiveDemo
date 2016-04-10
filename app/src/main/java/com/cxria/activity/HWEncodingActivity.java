@@ -4,7 +4,9 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.cxria.ui.CameraPreviewFrameView;
@@ -17,13 +19,17 @@ import com.pili.pldroid.streaming.widget.AspectFrameLayout;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class HWEncodingActivity extends AppCompatActivity implements CameraStreamingManager.StreamingStateListener {
+public class HWEncodingActivity extends AppCompatActivity implements CameraStreamingManager.StreamingStateListener, View.OnClickListener {
     private JSONObject mJSONObject;
     private CameraStreamingManager mCameraStreamingManager;
+
     private TextView tv_status;
+    private Button btn_switch_cam;
+    private Button btn_live_or_not;
     private StreamingProfile.Stream stream;
     private StreamingProfile profile;
     private CameraStreamingSetting setting;
+
     private AspectFrameLayout afl;
     private CameraPreviewFrameView cameraPreviewFrameView;
     /**
@@ -39,9 +45,15 @@ public class HWEncodingActivity extends AppCompatActivity implements CameraStrea
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hwencoding);
         initViews();
+        setListeners();
 
         getLiveAddress();
         setLiveStatus();
+    }
+
+    private void setListeners() {
+        btn_switch_cam.setOnClickListener(this);
+        btn_live_or_not.setOnClickListener(this);
     }
 
     /**
@@ -52,6 +64,9 @@ public class HWEncodingActivity extends AppCompatActivity implements CameraStrea
         wakeLock = this.powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "My Lock");
 
         tv_status = (TextView) findViewById(R.id.tv_status);
+        btn_switch_cam = (Button) findViewById(R.id.btn_switch_cam);
+        btn_live_or_not = (Button) findViewById(R.id.btn_live_or_not);
+
         afl = (AspectFrameLayout) findViewById(R.id.cameraPreview_afl);
         cameraPreviewFrameView = (CameraPreviewFrameView) findViewById(R.id.cameraPreview_surfaceView);
     }
@@ -67,7 +82,7 @@ public class HWEncodingActivity extends AppCompatActivity implements CameraStrea
                 .setStream(stream);
 
         setting = new CameraStreamingSetting();
-        setting.setCameraId(Camera.CameraInfo.CAMERA_FACING_BACK)
+        setting.setCameraId(Camera.CameraInfo.CAMERA_FACING_FRONT)
                 .setContinuousFocusModeEnabled(true)
                 .setCameraPrvSizeLevel(CameraStreamingSetting.PREVIEW_SIZE_LEVEL.LARGE)
                 .setCameraPrvSizeRatio(CameraStreamingSetting.PREVIEW_SIZE_RATIO.RATIO_16_9);
@@ -90,13 +105,31 @@ public class HWEncodingActivity extends AppCompatActivity implements CameraStrea
     }
 
     @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_switch_cam:
+                mCameraStreamingManager.switchCamera();
+                break;
+            case R.id.btn_live_or_not:
+                if (btn_live_or_not.getText().equals("正在直播...")) {
+                    btn_live_or_not.setText("开始直播");
+                    stopStreaming();
+                } else {
+                    btn_live_or_not.setText("正在直播");
+                    startStreaming();
+                }
+                break;
+        }
+    }
+
+    @Override
     public void onStateChanged(int state, Object o) {
         switch (state) {
             case CameraStreamingManager.STATE.PREPARING:
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        tv_status.setText("正在准备");
+                        tv_status.setText("准备中...");
                     }
                 });
                 break;
@@ -104,16 +137,16 @@ public class HWEncodingActivity extends AppCompatActivity implements CameraStrea
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        tv_status.setText("准备中...");
+                        tv_status.setText("点击开始直播");
+                        btn_live_or_not.setText("开始直播");
                     }
                 });
-                startStreaming();
                 break;
             case CameraStreamingManager.STATE.CONNECTING:
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        tv_status.setText("连接中");
+                        tv_status.setText("连接中...");
                     }
                 });
                 break;
@@ -121,11 +154,18 @@ public class HWEncodingActivity extends AppCompatActivity implements CameraStrea
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        tv_status.setText("正在直播");
+                        tv_status.setText("正在直播...");
+                        btn_live_or_not.setText("正在直播...");
                     }
                 });
                 break;
             case CameraStreamingManager.STATE.SHUTDOWN:
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tv_status.setText("点击开始直播");
+                    }
+                });
                 break;
             case CameraStreamingManager.STATE.IOERROR:
                 break;
@@ -149,6 +189,15 @@ public class HWEncodingActivity extends AppCompatActivity implements CameraStrea
             @Override
             public void run() {
                 mCameraStreamingManager.startStreaming();
+            }
+        }).start();
+    }
+
+    private void stopStreaming() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mCameraStreamingManager.stopStreaming();
             }
         }).start();
     }
