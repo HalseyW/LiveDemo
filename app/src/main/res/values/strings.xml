@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">LiveDemo</string>
+
+    <string name="start">开始</string>
+    <string name="hw_codec_camera_streaming_txt">HW Codec Camera Streaming</string>
+
+    <string name="string_state_ready">Ready</string>
+    <string name="string_state_preparing">准备...</string>
+    <string name="string_state_connecting">正在连接</string>
+    <string name="string_state_streaming">正在推流</string>
+    <string name="string_state_netblocking">NETBLOCKING, STOPPING</string>
+    <string name="string_state_con_timeout">连接超时</string>
+
+    <string name="flash_light_on">开</string>
+    <string name="flash_light_off">关</string>
+</resources>
